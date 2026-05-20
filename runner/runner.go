@@ -125,7 +125,7 @@ func (r *Runner) IsInterrupted() bool {
 }
 
 // picked based on try-fail but it seems to close to one it's used https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html#c1992
-var hammingDistanceThreshold int = 22
+const hammingDistanceThreshold = 22
 
 // regex for stripping ANSI codes
 var ansiRegex = regexp.MustCompile(`\x1b\[[0-9;]*m`)
@@ -552,9 +552,10 @@ func (r *Runner) prepareInput() {
 				r.hm.Set(target, []byte("1")) //nolint
 			} else if r.options.SkipDedupe && errors.Is(err, duplicateTargetErr) {
 				if v, ok := r.hm.Get(target); ok {
-					cnt, _ := strconv.Atoi(string(v))
-					_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
-					numHosts += 1
+					if cnt, parseErr := strconv.Atoi(string(v)); parseErr == nil && cnt > 0 {
+						_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
+						numHosts += 1
+					}
 				}
 			}
 		}
@@ -799,9 +800,10 @@ func (r *Runner) loadAndCloseFile(finput *os.File) (numTargets int, err error) {
 			r.hm.Set(target, []byte("1")) //nolint
 		} else if r.options.SkipDedupe && errors.Is(err, duplicateTargetErr) {
 			if v, ok := r.hm.Get(target); ok {
-				cnt, _ := strconv.Atoi(string(v))
-				_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
-				numTargets += 1
+				if cnt, parseErr := strconv.Atoi(string(v)); parseErr == nil && cnt > 0 {
+					_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
+					numTargets += 1
+				}
 			}
 		}
 	}
@@ -824,9 +826,10 @@ func (r *Runner) loadFromFormat(filePath string, format inputformats.Format) (nu
 			r.hm.Set(target, []byte("1")) //nolint
 		} else if r.options.SkipDedupe && errors.Is(countErr, duplicateTargetErr) {
 			if v, ok := r.hm.Get(target); ok {
-				cnt, _ := strconv.Atoi(string(v))
-				_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
-				numTargets += 1
+				if cnt, parseErr := strconv.Atoi(string(v)); parseErr == nil && cnt > 0 {
+					_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
+					numTargets += 1
+				}
 			}
 		}
 		return true
@@ -2204,7 +2207,12 @@ retry:
 
 	pipeline := false
 	if scanopts.Pipeline {
-		port, _ := strconv.Atoi(URL.Port())
+		port := 0
+		if portStr := URL.Port(); portStr != "" {
+			if p, err := strconv.Atoi(portStr); err == nil {
+				port = p
+			}
+		}
 		r.ratelimiter.Take()
 		pipeline = hp.SupportPipeline(protocol, method, URL.Host, port)
 		if pipeline {
