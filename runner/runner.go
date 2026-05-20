@@ -552,10 +552,9 @@ func (r *Runner) prepareInput() {
 				r.hm.Set(target, []byte("1")) //nolint
 			} else if r.options.SkipDedupe && errors.Is(err, duplicateTargetErr) {
 				if v, ok := r.hm.Get(target); ok {
-					if cnt, parseErr := strconv.Atoi(string(v)); parseErr == nil && cnt > 0 {
-						_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
-						numHosts += 1
-					}
+					cnt, _ := strconv.Atoi(string(v))
+					_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
+					numHosts += 1
 				}
 			}
 		}
@@ -800,10 +799,9 @@ func (r *Runner) loadAndCloseFile(finput *os.File) (numTargets int, err error) {
 			r.hm.Set(target, []byte("1")) //nolint
 		} else if r.options.SkipDedupe && errors.Is(err, duplicateTargetErr) {
 			if v, ok := r.hm.Get(target); ok {
-				if cnt, parseErr := strconv.Atoi(string(v)); parseErr == nil && cnt > 0 {
-					_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
-					numTargets += 1
-				}
+				cnt, _ := strconv.Atoi(string(v))
+				_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
+				numTargets += 1
 			}
 		}
 	}
@@ -826,10 +824,9 @@ func (r *Runner) loadFromFormat(filePath string, format inputformats.Format) (nu
 			r.hm.Set(target, []byte("1")) //nolint
 		} else if r.options.SkipDedupe && errors.Is(countErr, duplicateTargetErr) {
 			if v, ok := r.hm.Get(target); ok {
-				if cnt, parseErr := strconv.Atoi(string(v)); parseErr == nil && cnt > 0 {
-					_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
-					numTargets += 1
-				}
+				cnt, _ := strconv.Atoi(string(v))
+				_ = r.hm.Set(target, []byte(strconv.Itoa(cnt+1)))
+				numTargets += 1
 			}
 		}
 		return true
