@@ -19,7 +19,7 @@ require (
 	github.com/miekg/dns v1.1.68 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/asnmap v1.1.1
-	github.com/projectdiscovery/cdncheck v1.2.39
+	github.com/projectdiscovery/cdncheck v1.2.40
 	github.com/projectdiscovery/clistats v0.1.4
 	github.com/projectdiscovery/dsl v0.8.19
 	github.com/projectdiscovery/fastdialer v0.5.10
@@ -32,11 +32,11 @@ require (
 	github.com/projectdiscovery/networkpolicy v0.1.40
 	github.com/projectdiscovery/ratelimit v0.0.88
 	github.com/projectdiscovery/rawhttp v0.1.90
-	github.com/projectdiscovery/retryablehttp-go v1.3.14
+	github.com/projectdiscovery/retryablehttp-go v1.3.15
 	github.com/projectdiscovery/tlsx v1.2.2
 	github.com/projectdiscovery/useragent v0.0.108
 	github.com/projectdiscovery/utils v0.11.1
-	github.com/projectdiscovery/wappalyzergo v0.2.84
+	github.com/projectdiscovery/wappalyzergo v0.2.85
 	github.com/rs/xid v1.6.0
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/stretchr/testify v1.11.1
