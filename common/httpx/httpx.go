@@ -241,13 +241,19 @@ get_response:
 	resp.Input = req.Host
 
 	resp.Headers = httpresp.Header.Clone()
+	// body shouldn't be read with the following status codes
+	// 101 - Switching Protocols => websockets don't have a readable body
+	// 304 - Not Modified => no body the response terminates with latest header newline
+	shouldSkipBodyRead := generic.EqualsAny(httpresp.StatusCode, http.StatusSwitchingProtocols, http.StatusNotModified)
 
 	if h.Options.MaxResponseBodySizeToRead > 0 {
 		httpresp.Body = io.NopCloser(io.LimitReader(httpresp.Body, h.Options.MaxResponseBodySizeToRead))
-		defer func() {
-			_, _ = io.Copy(io.Discard, httpresp.Body)
-			_ = httpresp.Body.Close()
-		}()
+		if !shouldSkipBodyRead {
+			defer func() {
+				_, _ = io.Copy(io.Discard, httpresp.Body)
+				_ = httpresp.Body.Close()
+			}()
+		}
 	}
 
 	// httputil.DumpResponse does not handle websockets
@@ -272,10 +278,7 @@ get_response:
 	resp.Raw = string(rawResp)
 	resp.RawHeaders = string(headers)
 	var respbody []byte
-	// body shouldn't be read with the following status codes
-	// 101 - Switching Protocols => websockets don't have a readable body
-	// 304 - Not Modified => no body the response terminates with latest header newline
-	if !generic.EqualsAny(httpresp.StatusCode, http.StatusSwitchingProtocols, http.StatusNotModified) {
+	if !shouldSkipBodyRead {
 		var err error
 		respbody, err = io.ReadAll(io.LimitReader(httpresp.Body, h.Options.MaxResponseBodySizeToRead))
 		if err != nil && !shouldIgnoreBodyErrors {
