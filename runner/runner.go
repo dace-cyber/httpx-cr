@@ -310,6 +310,7 @@ func New(options *Options) (*Runner, error) {
 	runner.options.protocol = httpx.HTTPorHTTPS
 	scanopts.VHost = options.VHost
 	scanopts.OutputTitle = options.ExtractTitle
+	scanopts.OutputCopyright = options.Copyright
 	scanopts.OutputStatusCode = options.StatusCode
 	scanopts.OutputLocation = options.Location
 	scanopts.OutputContentLength = options.ContentLength
@@ -2130,6 +2131,20 @@ retry:
 		builder.WriteRune(']')
 	}
 
+	var copyright string
+	if scanopts.OutputCopyright {
+		copyright = httpx.ExtractCopyright(resp)
+		if copyright != "" {
+			builder.WriteString(" [")
+			if !scanopts.OutputWithNoColor {
+				builder.WriteString(aurora.Yellow(copyright).String())
+			} else {
+				builder.WriteString(copyright)
+			}
+			builder.WriteRune(']')
+		}
+	}
+
 	var bodyPreview string
 	if r.options.ResponseBodyPreviewSize > 0 && resp != nil {
 		bodyPreview = string(resp.Data)
@@ -2657,6 +2672,7 @@ retry:
 		Location:         resp.GetHeaderPart("Location", ";"),
 		ContentType:      resp.GetHeaderPart("Content-Type", ";"),
 		Title:            title,
+		Copyright:        copyright,
 		str:              builder.String(),
 		VHost:            isvhost,
 		WebServer:        serverHeader,
